@@ -49,7 +49,9 @@ def upload_image_api(request):
         return Response({keys.Error: "No user found."}, status=status.HTTP_400_BAD_REQUEST)
     
     image_instance = UploadedImage.objects.create(user=user_profile, image=image, image_type=image_type)
-    qr = qrcode.make(image_instance.image.url)
+    
+    qr_url = request.build_absolute_uri(image_instance.image.url)
+    qr = qrcode.make(qr_url)
     buffer = io.BytesIO()
     qr.save(buffer, format="PNG")
     image_instance.qr_code.save(f"qr_{image_instance.id}.png", ContentFile(buffer.getvalue()), save=True)
@@ -84,7 +86,7 @@ def image_gallery_api(request):
     first_type =  images.first().image_type if images.first() else "landscape"
 
     return Response({keys.Message: "Successfully Loaded",
-                     "images" : GallerySerilaizers(images,many=True,context={'request':request}).data,
+                     "images" : GallerySerilaizers(images,many=True,).data,
                      "first_type":first_type}, status=status.HTTP_200_OK)
 
 
