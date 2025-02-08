@@ -28,6 +28,8 @@ from helper import keys , functions
 @csrf_exempt
 @api_view(['POST'])
 def upload_image_api(request):
+    """This api is used for uploading image according to the user"""
+
     if 'image' not in request.data or keys.IMAGE_TYPE not in request.data:
         return Response({keys.Error: "Image and image_type are required."}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -61,6 +63,8 @@ def upload_image_api(request):
 
 
 def gallery(request):
+    """Gallery listing page"""
+
     return render(request, 'gallery/gallery.html')
 
 
@@ -88,8 +92,6 @@ def image_gallery_api(request):
     return Response({keys.Message: "Successfully Loaded",
                      "images" : GallerySerilaizers(images,many=True,).data,
                      "first_type":first_type}, status=status.HTTP_200_OK)
-
-
 
 def image_upload(request):
     """This view is used for image uploading"""
