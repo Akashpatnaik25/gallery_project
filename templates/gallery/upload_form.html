@@ -62,7 +62,8 @@
 <script>
     document.getElementById("uploadForm").addEventListener("submit", async function(event) {
         event.preventDefault();
-    
+        
+        const accessToken = localStorage.getItem("access_token");
         let formData = new FormData();
         let fileInput = document.getElementById("imageFile").files[0];
         let imageType = document.querySelector('input[name="image_type"]:checked').value;
@@ -76,46 +77,22 @@
         formData.append("image_type", imageType);
     
         try {
-            let response = await fetch("http://127.0.0.1:8000/gallery/upload-image", {
+            let response = await fetch("/gallery/upload-image", {
                 method: "POST",
                 body: formData,
+                headers: {
+                    {% comment %} "Content-Type": "application/json", {% endcomment %}
+                    "Authorization": `Bearer ${accessToken}`
+                }
                 // headers: {"X-CSRFToken": getCookie("csrftoken")}
             });
     
             let data = await response.json();
             document.getElementById("responseMessage").innerText = data.message;
-            console.log(localStorage['access_token'])
+            console.log(localStorage.getItem('access_token'));
             // Fetch Gallery after successful upload
-            {% comment %} const galleryResponse = await fetch("/gallery", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage['access_token']}`
-                }
-            });
-    
-            const contentType = galleryResponse.headers.get("content-type");
-    
-            if (galleryResponse.ok) {
-                if (contentType && contentType.includes("application/json")) {
-                    const galleryData = await galleryResponse.json();
-                    console.log("Gallery JSON response:", galleryData);
-                } else {
-                    const galleryHtml = await galleryResponse.text();
-                    console.log("Gallery HTML response:", galleryHtml);
-                    document.open();
-                    document.write(galleryHtml);
-                    document.close();
-                }
-    
-                // Redirect to Gallery
-                
-                // Prevent Back Navigation
-                history.replaceState(null, null, "");
-            } else {
-                throw new Error("Failed to fetch gallery data.");
-            } {% endcomment %}
-            window.location.href = "/gallery";
+            
+            window.location.href = "/gallery"; 
         } catch (error) {
             console.error("Error:", error);
         }

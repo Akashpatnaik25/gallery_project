@@ -32,12 +32,21 @@
         </style>
     </head>
     <body>
+        <button id="logout">Logout</button>
+
         <h2>QR Code Gallery</h2>
         <button id="UploadImage">Upload Image</button>
-
+        
         <div id = 'imageType'></div>
         <div class="gallery-container" id="gallery"></div>
         <script>
+            document.getElementById("logout").addEventListener("click", function () {
+                window.location.href = "/";
+                localStorage.clear();
+                sessionStorage.clear();
+                
+            history.replaceState(null, null, "");
+            });
             document.addEventListener("DOMContentLoaded", async function () {
                 const accessToken = localStorage.getItem("access_token");
                 if (!accessToken) {
@@ -126,6 +135,7 @@
                 
                 window.location.href = "/gallery/upload-page";
             });
+            
         </script>
     </body>
 </html>

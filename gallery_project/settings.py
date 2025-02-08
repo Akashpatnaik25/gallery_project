@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'gallery'
-]
+]   
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -148,3 +148,17 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # STATICFILES_DIRS = [BASE_DIR / 'static']
+
+
+from datetime import timedelta
+
+# Add or update this inside settings.py
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=100),  # Extend access token lifespan
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Extend refresh token lifespan
+    "ROTATE_REFRESH_TOKENS": True,  # Rotate refresh tokens when used
+    "BLACKLIST_AFTER_ROTATION": True,  # Blacklist old refresh tokens
+    "ALGORITHM": "HS256",  # Encryption algorithm
+    "SIGNING_KEY": SECRET_KEY,  # Make sure your SECRET_KEY is set
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}

@@ -34,9 +34,11 @@ def upload_image_api(request):
     image = request.data.get('image')
     image_type = request.data.get(keys.IMAGE_TYPE)
     validation_error = functions.validate_image(image)
+    print(image_type,validation_error)
     if validation_error:
         return Response({keys.Error: validation_error}, status=status.HTTP_400_BAD_REQUEST)
     user, error_response = functions.get_user_from_token(request)
+
     if error_response:
         return error_response  # Return if token is invalid
     

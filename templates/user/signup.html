@@ -45,7 +45,6 @@
 </head>
 <body>
     <form id="signupForm">
-        {% csrf_token %}
         <input type="text" name="username" id="username" placeholder="Username" required>
         <input type="text" name="fullname" id="fullname" placeholder="Full Name" required>
         <input type="number" name="age" id="age" placeholder="Age" required>
@@ -58,32 +57,44 @@
         <input type="password" name="password" id="password" placeholder="Password" required>
         <button type="submit">Sign Up</button>
     </form>
+    
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("signupForm").addEventListener("submit", function(event) {
-                event.preventDefault(); // Prevent default form submission
-                const username = document.getElementById("username").value;
-                const fullname = document.getElementById("fullname").value;
-                const age = document.getElementById("age").value;
-                const gender = document.getElementById("gender").value;
-                const password = document.getElementById("password").value;
-                const apiUrl = "/signup";
-                const requestData = { username, fullname, age, gender, password };
-                fetch(apiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(requestData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    {% comment %} alert(data['message']);  {% endcomment %}
-                    console.log(data);
-                    localStorage.setItem('access_token',data.access_token)
-                })
-                .catch(error => {
-                    alert("Error signing up!");
-                    console.error("Error:", error);
-                });
+        document.getElementById("signupForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const username = document.getElementById("username").value;
+            const fullname = document.getElementById("fullname").value;
+            const age = document.getElementById("age").value;
+            const gender = document.getElementById("gender").value;
+            const password = document.getElementById("password").value;
+            
+            const apiUrl = "/signup";
+            const requestData = { username, fullname, age, gender, password };
+
+            fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Signup failed! Please try again.");
+                }
+                return response.json(); // Parse the JSON response
+            })
+            .then(data => {
+                // Store tokens in localStorage if provided
+                if (data.access_token && data.refresh_token) {
+                    localStorage.setItem("access_token", data.access_token);
+                    localStorage.setItem("refresh_token", data.refresh_token);
+                }
+
+                // Redirect to gallery page on successful signup
+                window.location.href = "/gallery";
+            })
+            .catch(error => {
+                alert(error.message);
+                console.error("Error:", error);
             });
         });
     </script>

@@ -50,6 +50,7 @@ def get_user_from_token(request):
         
         # Get user from token
         user = User.objects.get(id=decoded_token["user_id"])
+
         return user, None
 
     except Exception as e:
