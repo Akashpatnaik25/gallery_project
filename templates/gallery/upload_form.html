@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Uploader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .radio-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #138496;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Image Uploader</h2>
+    <form id="uploadForm">
+        <label>Select Image Type:</label>
+        <div class="radio-group">
+            <input type="radio" id="portrait" name="image_type" value="portrait" checked>
+            <label for="portrait">Portrait</label>
+            <br>
+            <input type="radio" id="landscape" name="image_type" value="landscape">
+            <label for="landscape">Landscape</label>
+        </div>
+
+        <input type="file" id="imageFile" required>
+        <br><br>
+        <button type="submit">Upload</button>
+    </form>
+
+    <p id="responseMessage"></p>
+</div>
+
+</body>
+
+<script>
+    document.getElementById("uploadForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+    
+        let formData = new FormData();
+        let fileInput = document.getElementById("imageFile").files[0];
+        let imageType = document.querySelector('input[name="image_type"]:checked').value;
+    
+        if (!fileInput) {
+            alert("Please select an image to upload.");
+            return;
+        }
+    
+        formData.append("image", fileInput);
+        formData.append("image_type", imageType);
+    
+        try {
+            let response = await fetch("http://127.0.0.1:8000/gallery/upload-image", {
+                method: "POST",
+                body: formData,
+                // headers: {"X-CSRFToken": getCookie("csrftoken")}
+            });
+    
+            let data = await response.json();
+            document.getElementById("responseMessage").innerText = data.message;
+            console.log(localStorage['access_token'])
+            // Fetch Gallery after successful upload
+            {% comment %} const galleryResponse = await fetch("/gallery", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage['access_token']}`
+                }
+            });
+    
+            const contentType = galleryResponse.headers.get("content-type");
+    
+            if (galleryResponse.ok) {
+                if (contentType && contentType.includes("application/json")) {
+                    const galleryData = await galleryResponse.json();
+                    console.log("Gallery JSON response:", galleryData);
+                } else {
+                    const galleryHtml = await galleryResponse.text();
+                    console.log("Gallery HTML response:", galleryHtml);
+                    document.open();
+                    document.write(galleryHtml);
+                    document.close();
+                }
+    
+                // Redirect to Gallery
+                
+                // Prevent Back Navigation
+                history.replaceState(null, null, "");
+            } else {
+                throw new Error("Failed to fetch gallery data.");
+            } {% endcomment %}
+            window.location.href = "/gallery";
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    });
+    
+</script>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <style>
+        .gallery-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+            background-color: #87CEEB;
+            padding: 15px;
+            justify-content: center;
+            border-radius: 10px;
+            width: fit-content;
+        }
+        .image-container {
+            padding: 5px;
+        }
+        .image-container img {
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+    </style>
+</head>
+<body>
+    {% comment %} <span> {% endcomment %}
+        <div><h2>Image Gallery</h2> <button id="UploadImage">Upload Image {{first_type}}</button>
+    
+        </div>
+        {% comment %} </span> {% endcomment %}
+        <div class="gallery-container">
+            {% for row in images %}
+                <div class="row">
+                    {% for image in row %}
+                        <div class="image-container">
+                            <img src="{{ image.qr_code.url }}" alt="QR Code">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+</body>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const galleryResponse = await fetch("/gallery", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage['access_token']}`
+            }
+        });
+
+        const contentType = galleryResponse.headers.get("content-type");
+
+        if (galleryResponse.ok) {
+            if (contentType && contentType.includes("application/json")) {
+                const galleryData = await galleryResponse.json();
+                console.log("Gallery JSON response:", galleryData);
+            } else {
+                const galleryHtml = await galleryResponse.text();
+                console.log("Gallery HTML response:", galleryHtml);
+                document.open();
+                document.write(galleryHtml);
+                document.close();
+            }
+
+            // Redirect to Gallery
+            {% comment %} window.location.href = "/gallery"; {% endcomment %}
+
+            // Prevent Back Navigation
+            history.replaceState(null, null, "");
+    });
+
+
+document.getElementById("UploadImage").addEventListener("click", function() {
+    window.location.href = "{% url 'image_upload' %}";  // Redirect to signup page
+});
+
+</script>
+</html>

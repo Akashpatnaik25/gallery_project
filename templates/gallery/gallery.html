@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>QR Code Gallery</title>
+        <style>
+            body {
+                background-color: #f0f8ff;
+                text-align: center;
+            }
+            .gallery-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                padding: 20px;
+            }
+            .row {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                background-color: blue;
+                padding: 15px;
+                border-radius: 10px;
+                width: 250px;
+            }
+            .image-container img {
+                width: 100px;
+                height: 100px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>QR Code Gallery</h2>
+        <button id="UploadImage">Upload Image</button>
+
+        <div id = 'imageType'></div>
+        <div class="gallery-container" id="gallery"></div>
+        <script>
+            document.addEventListener("DOMContentLoaded", async function () {
+                const accessToken = localStorage.getItem("access_token");
+                if (!accessToken) {
+                    console.error("No access token found. Redirecting to login.");
+                    window.location.href = "";
+                    return;
+                }
+
+                try {
+                    const response = await fetch("/gallery/gallery-list", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${accessToken}`
+                        }
+                    });
+
+                    if (!response.ok) throw new Error("Failed to fetch gallery data.");
+
+                    const data = await response.json();
+                    console.log(data)
+                    if (Array.isArray(data)) {
+                        renderGallery(data);
+                    } else if (data.images && Array.isArray(data.images)) {
+                        renderGallery(data);
+                    } else {
+                        console.error("Unexpected API response format:", data);
+                    }
+                } catch (error) {
+                    console.error("Error fetching gallery:", error);
+                    window.location.href = "/";
+                }
+
+            });
+
+            function renderGallery(data) {
+                const images = data.images;
+                const typeDisplay = document.getElementById("imageType");
+            if (typeDisplay) {
+                typeDisplay.textContent = `Gallery Type: ${data.first_type}`;
+            }
+                const galleryContainer = document.getElementById("gallery");
+                galleryContainer.innerHTML = "";
+            
+                // Define dynamic layouts based on type
+                const layouts = {
+                    "portrait": [[2], [1], [2], [1]],
+                    "landscape": [[1], [2], [1], [2]],
+                    "square": [[2], [2], [2], [2]],
+                };
+            
+                const selectedLayout = layouts[data.first_type] || layouts["portrait"]; // Default to portrait
+            
+                let index = 0;
+                let layoutIndex = 0;
+                
+                while (index < images.length) {
+                    const rowConfig = selectedLayout[layoutIndex % selectedLayout.length]; // Loop through the layout
+            
+                    const rowDiv = document.createElement("div");
+                    
+                    rowDiv.classList.add("row");
+                    
+                    rowConfig.forEach((count) => {
+                        for (let i = 0; i < count; i++) {
+                            if (index >= images.length) break;
+            
+                            const imgContainer = document.createElement("div");
+                            imgContainer.classList.add("image-container");
+            
+                            const img = document.createElement("img");
+                            img.src = images[index]['qr_code'] || "#";
+                            img.alt = "QR Code";
+            
+                            imgContainer.appendChild(img);
+                            rowDiv.appendChild(imgContainer);
+                            index++;
+                        }
+                    });
+            
+                    galleryContainer.appendChild(rowDiv);
+                    layoutIndex++; // Move to the next row layout
+                }
+            }
+            document.getElementById("UploadImage").addEventListener("click", function () {
+                
+                window.location.href = "/gallery/upload-page";
+            });
+        </script>
+    </body>
+</html>
